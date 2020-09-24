@@ -33,7 +33,7 @@ sep_old <-
 
 
 sep_new <- 
-  read_excel("downloaded_data//class_enrollment_summary_by_term_9-22-2020.xlsx", 
+  read_excel("downloaded_data/class_enrollment_summary_by_term_9-22-2020.xlsx", 
              skip = 3) %>% 
   clean_names() %>% 
   filter(! is.na(course_title)) %>% 
@@ -58,6 +58,48 @@ d) Write down some thoughts about what might explain these increases and decreas
 
 See [here](https://rpubs.com/dkane/week-3) for my answers. No need to copy exactly what I have done! Make yours better.
 
+```{r}
+sep_change <- inner_join(sep_old, sep_new, 
+                         by = "id", 
+                         suffix = c("_old", "_new")) %>%
+  mutate(diff = u_grad_new - u_grad_old)
+
+#This shows the largest increases
+
+sep_change %>%
+  arrange(desc(diff)) %>%
+  head(5) %>%
+  gt()
+
+#This shows the largest decreases
+
+sep_change %>%
+  arrange(diff) %>%
+  head(5) %>%
+  gt()
+
+
+decreasing <- sep_change %>%
+  arrange(diff) %>%
+  slice(1:5)
+
+
+increasing <- sep_change %>%
+  arrange(desc(diff)) %>%
+  slice(1:5)
+
+rbind(increasing, decreasing)
+
+```
+```{r}
+combinetable <- rbind(increasing, decreasing) %>%
+  ggplot(aes(x = reorder(
+    diff, y = title_old))+
+  geom_col()+
+  labs(title = "Change in Course Enrollment at Harvard", x = "Change in Enrollment", y = "Course Name")
+
+combinetable
+```
 
 
 ## Scene 2
